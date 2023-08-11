@@ -22,11 +22,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.github.AstethixOS.KotlinShell.CommandOutput
 import com.github.AstethixOS.KotlinShell.Shell
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -35,11 +39,12 @@ fun App(
     exit: () -> Unit,
     changeMaximizedState: () -> Unit
 ) {
+    var test by remember { mutableStateOf("d") }
     var drawerState = rememberDrawerState(DrawerValue.Closed)
 
     var History by rememberSaveable {
         mutableStateOf(
-            mutableListOf<CommandOutput>()
+            listOf<CommandOutput>()
         )
     }
 
@@ -48,11 +53,13 @@ fun App(
             Shell(
                 exit = { exit.invoke() },
                 onHistoryChange = {
+                    History = listOf()
                     History = this
                 }
             )
         )
     }
+
     var CurrentTypedCommand by rememberSaveable { mutableStateOf("") }
     var drawerStateSwitcherScope = rememberCoroutineScope()
     MaterialTheme(
@@ -101,7 +108,7 @@ fun App(
                                 modifier = Modifier.fillMaxHeight()
                                     .clip(RoundedCornerShape(100))
                                     .clickable(
-
+                                        role = Role.DropdownList
                                     ) {
 
                                     }
@@ -183,7 +190,6 @@ fun App(
                                                 var command = CurrentTypedCommand
                                                 CurrentTypedCommand = ""
                                                 Shell.Execute(command)
-                                                println(Shell.history)
                                             }
                                             true
                                         },
